@@ -1,7 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using Google.Cloud.Firestore;
-using Microsoft.JSInterop;
 using ProyectoDonacion.DTOs;
 using ProyectoDonacion.Models;
 

@@ -1,4 +1,5 @@
 using Microsoft.OpenApi;
+using ProyectoDonacion.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,10 @@ builder.Services.AddOpenApi("v1", options =>
         return Task.CompletedTask;
     });
 });
+
+builder.Services.AddTransient<AuthService>()
+    .AddTransient<FirebaseService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
