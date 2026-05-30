@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProyectoDonacion.Common;
 using ProyectoDonacion.DTOs;
 using ProyectoDonacion.Services.Auth;
 
@@ -15,32 +16,28 @@ namespace ProyectoDonacion.Controllers
             _authService = authService;
         }
 
-        [HttpPost()]
-        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
-        {
-            try
-            {
-                var user = await _authService.Register(dto);
-                return Ok(user);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
         [HttpGet()]
         public async Task<IActionResult> GetAllUsers()
         {
-            try
-            {
-                var users = await _authService.GetAllUsers();
-                return Ok(users);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var response = await _authService.GetAllUsers();
+
+            if (response.Type != ResponseType.Ok)
+                return BadRequest(response);
+
+            return Ok(response);
         }
+
+        [HttpPost()]
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+        {
+            var response = await _authService.Register(dto);
+
+            if (response.Type != ResponseType.Ok)
+                return BadRequest(response);
+
+            return Ok(response);
+        }
+
+       
     }
 }

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using ProyectoDonacion.Common;
 using ProyectoDonacion.DTOs;
 using ProyectoDonacion.Models.Auth;
 using ProyectoDonacion.Services.FireBase;
@@ -15,47 +16,62 @@ public class AuthService
         _firebaseService = firebaseService;
     }
 
-    public async Task<User> Register(RegisterDto dto)
+    public async Task<ApiResponse<User>> Register(RegisterDto dto)
     {
-        //  Primero verificar que no exista un usuario con ese correo
-        var collection = _firebaseService.GetCollection("users");
-        var existing = await collection
-            .WhereEqualTo("Email", dto.Email)
-            .GetSnapshotAsync();
-
-        if (existing.Count > 0)
-            throw new Exception("Ya existe un usuario con ese correo");
-
-        // Darle permiso de que se pueda crear el nuevo usuario
-        var user = new User
+        try
         {
-            Id = Guid.NewGuid().ToString(),
-            Nombre = dto.Nombre,
-            Email = dto.Email,
-            PasswordHash = HashPassword(dto.Password),
-            Rol = "user",
-            FechaCreacion =  DateTime.UtcNow
-        };
+            //  Primero verificar que no exista un usuario con ese correo
+            var collection = _firebaseService.GetCollection("users");
+            var existing = await collection
+                .WhereEqualTo("Email", dto.Email)
+                .GetSnapshotAsync();
 
-        // Guardamos el objeto en FS directamente sin diccionarios
-        await collection.Document(user.Id).SetAsync(user);
-        return user;
+            if (existing.Count > 0)
+                return ApiResponse<User>.Warning("Ya existe un usuario con ese correo");
+
+            // Darle permiso de que se pueda crear el nuevo usuario
+            var user = new User
+            {
+                Id = Guid.NewGuid().ToString(),
+                Nombre = dto.Nombre,
+                Email = dto.Email,
+                PasswordHash = HashPassword(dto.Password),
+                Rol = "user",
+                FechaCreacion = DateTime.UtcNow
+            };
+
+            // Guardamos el objeto en FS directamente sin diccionarios
+            await collection.Document(user.Id).SetAsync(user);
+
+            return ApiResponse<User>.Success(user, "Usuario registrado exitosamente");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<User>.Failure($"Error al registrar usuario: {ex.Message}");
+        }
     }
 
-    public async Task<List<User>> GetAllUsers()
+    public async Task<ApiResponse<List<User>>> GetAllUsers()
     {
-        var collection = _firebaseService.GetCollection("users");
-        var snapshot = await collection.GetSnapshotAsync();
-
-        var users = new List<User>();
-        foreach (var document in snapshot.Documents)
+        try
         {
-            // Convertimos directamente el documento a User usando FirestoreData
-            var user = document.ConvertTo<User>();
-            users.Add(user);
-        }
+            var collection = _firebaseService.GetCollection("users");
+            var snapshot = await collection.GetSnapshotAsync();
 
-        return users;
+            var users = new List<User>();
+            foreach (var document in snapshot.Documents)
+            {
+                // Convertimos directamente el documento a User usando FirestoreData
+                var user = document.ConvertTo<User>();
+                users.Add(user);
+            }
+
+            return ApiResponse<List<User>>.Success(users, $"Se encontraron {users.Count} usuario(s)");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<List<User>>.Failure($"Error al obtener usuarios: {ex.Message}");
+        }
     }
 
     private string HashPassword(string password)
