@@ -1,7 +1,7 @@
 using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Routing.Patterns;
 
-namespace ProyectoDonacion.Services;
+namespace ProyectoDonacion.Services.FireBase;
 
 public class FirebaseService
 {

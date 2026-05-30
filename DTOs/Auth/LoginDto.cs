@@ -1,4 +1,4 @@
-namespace ProyectoDonacion.DTOs;
+namespace ProyectoDonacion.DTOs.Auth;
 
 public class LoginDto
 {

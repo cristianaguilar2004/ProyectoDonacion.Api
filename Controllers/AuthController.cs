@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProyectoDonacion.DTOs;
-using ProyectoDonacion.Services;
+using ProyectoDonacion.Services.Auth;
 
 namespace ProyectoDonacion.Controllers
 {
@@ -26,6 +26,20 @@ namespace ProyectoDonacion.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet()]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try
+            {
+                var users = await _authService.GetAllUsers();
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
             }
         }
     }
