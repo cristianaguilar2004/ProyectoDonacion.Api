@@ -82,6 +82,74 @@ public class AuthService
         }
     }
 
+    public async Task<ApiResponse<User>> GetUserById(string id)
+    {
+        try
+        {
+            var collection = _firebaseService.GetCollection("users");
+            var snapshot = await collection
+                .WhereEqualTo("Id", id)
+                .GetSnapshotAsync();
+            if (snapshot.Count == 0)
+                return ApiResponse<User>.Warning("No se encontró un usuario con ese ID");
+
+            User user = snapshot.Documents[0].ConvertTo<User>();
+            return ApiResponse<User>.Success(user, "Usuario encontrado");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<User>.Failure($"Error al obtener usuario: {ex.Message}");
+        }
+    }
+
+    public async Task<ApiResponse<bool>> DesactivarUsuario(string id)
+    {
+        try
+        {
+            var collection = _firebaseService.GetCollection("users");
+            var snapshot = await collection
+                .WhereEqualTo("Id", id)
+                .GetSnapshotAsync();
+            if (snapshot.Count == 0)
+                return ApiResponse<bool>.Warning("No se encontró un usuario con ese ID");
+            var docRef = snapshot.Documents[0].Reference;
+            await docRef.UpdateAsync("Activo", false);
+
+            return ApiResponse<bool>.Success(true, "Usuario desactivado exitosamente");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<bool>.Failure($"Error al desactivar usuario: {ex.Message}");
+        }
+    }
+
+
+    public async Task<ApiResponse<User>> Login(LoginDto dto)
+    {
+        try
+        {
+            var collection = _firebaseService.GetCollection("users");
+            var snapshot = await collection
+                .WhereEqualTo("Email", dto.Email)
+                .GetSnapshotAsync();
+            if (snapshot.Count == 0)
+                return ApiResponse<User>.Warning("No se encontró un usuario con ese correo");
+
+            User user = snapshot.Documents[0].ConvertTo<User>();
+            if (user.PasswordHash != HashPassword(dto.Password))
+                return ApiResponse<User>.Warning("Contraseña incorrecta");
+
+            if (!user.Activo)
+                return ApiResponse<User>.Warning("El usuario no está activo");
+
+            return ApiResponse<User>.Success(user, "Login exitoso");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<User>.Failure($"Error al iniciar sesión: {ex.Message}");
+        }
+    }
+
     private string HashPassword(string password)
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));

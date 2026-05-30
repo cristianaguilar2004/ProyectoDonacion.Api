@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProyectoDonacion.Common;
 using ProyectoDonacion.DTOs;
+using ProyectoDonacion.DTOs.Auth;
 using ProyectoDonacion.Services.Auth;
 
 namespace ProyectoDonacion.Controllers
@@ -27,6 +28,28 @@ namespace ProyectoDonacion.Controllers
             return Ok(response);
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById([FromRoute] string id)
+        {
+            var response = await _authService.GetUserById(id);
+
+            if (response.Type != ResponseType.Ok)
+                return BadRequest(response);
+
+            return Ok(response);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            var response = await _authService.Login(dto);
+
+            if (response.Type != ResponseType.Ok)
+                return BadRequest(response);
+
+            return Ok(response);
+        }
+
         [HttpPost()]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
@@ -38,6 +61,15 @@ namespace ProyectoDonacion.Controllers
             return Ok(response);
         }
 
-       
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> DesactivarUsuario([FromRoute] string id)
+        {
+            var response = await _authService.DesactivarUsuario(id);
+            if (response.Type != ResponseType.Ok)
+                return BadRequest(response);
+            return Ok(response);
+
+
+        }
     }
 }
