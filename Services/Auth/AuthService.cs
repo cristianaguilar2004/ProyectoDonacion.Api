@@ -1,7 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
+using AutoMapper;
 using ProyectoDonacion.Common;
 using ProyectoDonacion.DTOs;
+using ProyectoDonacion.DTOs.Auth;
 using ProyectoDonacion.Models.Auth;
 using ProyectoDonacion.Services.FireBase;
 
@@ -10,10 +12,12 @@ namespace ProyectoDonacion.Services.Auth;
 public class AuthService
 {
     private readonly FirebaseService _firebaseService;
+    private readonly IMapper _mapper;
 
-    public AuthService(FirebaseService firebaseService)
+    public AuthService(FirebaseService firebaseService, IMapper mapper)
     {
         _firebaseService = firebaseService;
+        _mapper = mapper;
     }
 
     public async Task<ApiResponse<User>> Register(RegisterDto dto)
@@ -29,15 +33,16 @@ public class AuthService
             if (existing.Count > 0)
                 return ApiResponse<User>.Warning("Ya existe un usuario con ese correo");
 
-            // Darle permiso de que se pueda crear el nuevo usuario
-            var user = new User
+            // construir el objeto User a partir del DTO
+            User user = new User
             {
                 Id = Guid.NewGuid().ToString(),
                 Nombre = dto.Nombre,
                 Email = dto.Email,
                 PasswordHash = HashPassword(dto.Password),
-                Rol = "user",
-                FechaCreacion = DateTime.UtcNow
+                Rol = dto.Rol ?? "user",
+                FechaCreacion = DateTime.UtcNow,
+                Activo = true
             };
 
             // Guardamos el objeto en FS directamente sin diccionarios
@@ -51,26 +56,29 @@ public class AuthService
         }
     }
 
-    public async Task<ApiResponse<List<User>>> GetAllUsers()
+    public async Task<ApiResponse<List<UserDto>>> GetAllUsers(bool activos = true)
     {
         try
         {
             var collection = _firebaseService.GetCollection("users");
             var snapshot = await collection.GetSnapshotAsync();
 
-            var users = new List<User>();
+            List<User> users = new List<User>();
             foreach (var document in snapshot.Documents)
             {
                 // Convertimos directamente el documento a User usando FirestoreData
-                var user = document.ConvertTo<User>();
+                User user = document.ConvertTo<User>();
                 users.Add(user);
-            }
+            }  
 
-            return ApiResponse<List<User>>.Success(users, $"Se encontraron {users.Count} usuario(s)");
+            if(activos)
+                users = users.Where(u => u.Activo).ToList();
+
+            return ApiResponse<List<UserDto>>.Success(_mapper.Map<List<UserDto>>(users), $"Se encontraron {users.Count} usuario(s)");
         }
         catch (Exception ex)
         {
-            return ApiResponse<List<User>>.Failure($"Error al obtener usuarios: {ex.Message}");
+            return ApiResponse<List<UserDto>>.Failure($"Error al obtener usuarios: {ex.Message}");
         }
     }
 

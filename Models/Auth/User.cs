@@ -27,4 +27,7 @@ public class User
 
     [FirestoreProperty("FechaCreacion")]
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
+
+    [FirestoreProperty("Activo")]
+    public bool Activo { get; set; } = true;
 }
