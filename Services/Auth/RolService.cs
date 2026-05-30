@@ -41,26 +41,20 @@ public class RolService
         try
         {
             if (string.IsNullOrWhiteSpace(dto.Id))
-            {
                 return ApiResponse<Rol>.Warning("El ID del rol es requerido");
-            }
 
             var collection = _firebaseService.GetCollection("roles");
 
             var existingById = await collection.Document(dto.Id).GetSnapshotAsync();
             if (existingById.Exists)
-            {
                 return ApiResponse<Rol>.Warning($"Ya existe un rol con el ID '{dto.Id}'");
-            }
 
             var existingByName = await collection
                 .WhereEqualTo("Nombre", dto.Nombre)
                 .GetSnapshotAsync();
 
             if (existingByName.Count > 0)
-            {
                 return ApiResponse<Rol>.Warning($"Ya existe un rol con el nombre '{dto.Nombre}'");
-            }
 
             var rol = new Rol
             {
