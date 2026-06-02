@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using ProyectoDonacion.Services.Auth;
+using ProyectoDonacion.Services.Categorias;
 using ProyectoDonacion.Services.FireBase;
 using Scalar.AspNetCore;
 using System.Text;
@@ -53,9 +54,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddAuthorization();
 
 builder.Services.AddAutoMapper(cfg => cfg.LicenseKey = "eyJhbGciOiJSUzI1NiIsImtpZCI6Ikx1Y2t5UGVubnlTb2Z0d2FyZUxpY2Vuc2VLZXkvYmJiMTNhY2I1OTkwNGQ4OWI0Y2IxYzg1ZjA4OGNjZjkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2x1Y2t5cGVubnlzb2Z0d2FyZS5jb20iLCJhdWQiOiJMdWNreVBlbm55U29mdHdhcmUiLCJleHAiOiIxODExNjM1MjAwIiwiaWF0IjoiMTc4MDEyNjAwMiIsImFjY291bnRfaWQiOiIwMTllNzdjNmNkZWY3ODAwOTk3NjZmZDA0YmI5NDc3MiIsImN1c3RvbWVyX2lkIjoiY3RtXzAxa3N2d2ViZXE0dGE2eXNzMGR2a2d0NWRhIiwic3ViX2lkIjoiLSIsImVkaXRpb24iOiIwIiwidHlwZSI6IjIifQ.WiDqb2CyHQOXQts8e0oWxybp34Aqn1k5Q5aQ-3zcM6cCYmfJ66tmrpmg2MiLedaLbXuOHg3JB26OrUaJwhZkXBDd2mxqq6xnMZAh-5a6rjvhZ_ss7d1aAxxR-r5GTxc8CLErkG-kxK5N72tJRKS7MYgX6Gp1xAgvqE-1KESQtwr22lhsLiicDeTFOxT70AkmzA6I6smVM4ylGy8J4V_9SrWabQl_W-uRdZvs00Iz4CypsN4RU_ooIZUVFuFAR1anmMoQulTcSQklPsayIyolRpqxyx31eXiBpU5TjSLNNLhrpnEBesdFkMvosRYg9buLIy-ouPaGpl_f8E8w0tZvTA", typeof(Program));
+
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddTransient<AuthService>()
     .AddTransient<RolService>()
-    .AddTransient<FirebaseService>();
+    .AddTransient<FirebaseService>()
+    .AddScoped<UsuarioAutenticadoService>()
+    .AddTransient<CategoriaService>();
 
 var app = builder.Build();
 
