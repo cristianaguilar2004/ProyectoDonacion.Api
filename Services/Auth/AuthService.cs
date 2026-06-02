@@ -1,23 +1,28 @@
-using System.Security.Cryptography;
-using System.Text;
 using AutoMapper;
+using Microsoft.IdentityModel.Tokens;
 using ProyectoDonacion.Common;
 using ProyectoDonacion.DTOs;
 using ProyectoDonacion.DTOs.Auth;
 using ProyectoDonacion.Models.Auth;
 using ProyectoDonacion.Services.FireBase;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ProyectoDonacion.Services.Auth;
 
 public class AuthService
 {
     private readonly FirebaseService _firebaseService;
+    private readonly IConfiguration _configuration;
     private readonly IMapper _mapper;
 
-    public AuthService(FirebaseService firebaseService, IMapper mapper)
+    public AuthService(FirebaseService firebaseService, IMapper mapper, IConfiguration configuration)
     {
         _firebaseService = firebaseService;
         _mapper = mapper;
+        _configuration = configuration;
     }
 
     public async Task<ApiResponse<User>> Register(RegisterDto dto)
@@ -124,7 +129,7 @@ public class AuthService
     }
 
 
-    public async Task<ApiResponse<User>> Login(LoginDto dto)
+    public async Task<ApiResponse<string>> Login(LoginDto dto)
     {
         try
         {
@@ -133,21 +138,47 @@ public class AuthService
                 .WhereEqualTo("Email", dto.Email)
                 .GetSnapshotAsync();
             if (snapshot.Count == 0)
-                return ApiResponse<User>.Warning("No se encontró un usuario con ese correo");
+                return ApiResponse<string>.Warning("No se encontró un usuario con ese correo");
 
             User user = snapshot.Documents[0].ConvertTo<User>();
             if (user.PasswordHash != HashPassword(dto.Password))
-                return ApiResponse<User>.Warning("Contraseña incorrecta");
-
+                return ApiResponse<string>.Warning("Contraseña incorrecta");        
             if (!user.Activo)
-                return ApiResponse<User>.Warning("El usuario no está activo");
+                return ApiResponse<string>.Warning("El usuario no está activo");
 
-            return ApiResponse<User>.Success(user, "Login exitoso");
+            return ApiResponse<string>.Success(GenerateToken(user), "Login exitoso");
         }
         catch (Exception ex)
         {
-            return ApiResponse<User>.Failure($"Error al iniciar sesión: {ex.Message}");
+            return ApiResponse<string>.Failure($"Error al iniciar sesión: {ex.Message}");
         }
+    }
+
+    private string GenerateToken(User user)
+    {
+        // El token lleva cierta informacion, Id, Email y Role del usuario que hizo login
+        // Para proteccion de los endpoints, se sabe quien los esta llamando
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Rol)
+        };
+
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+
+                issuer: _configuration["Jwt:Issuer"], //Quien lo genera, nuestro token lo genera la app
+                audience: _configuration["Jwt:Issuer"], // Para quien lo genera, clientes / front-end
+                claims: claims, // Estos son los datos del usuario
+                expires: DateTime.UtcNow.AddHours(8), //Tiempo de vida del token
+                signingCredentials: creds // Firma de seguridad
+                );
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     private string HashPassword(string password)

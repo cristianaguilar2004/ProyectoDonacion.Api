@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProyectoDonacion.Common;
 using ProyectoDonacion.DTOs;
 using ProyectoDonacion.DTOs.Auth;
@@ -17,7 +18,7 @@ namespace ProyectoDonacion.Controllers
             _authService = authService;
         }
 
-        [HttpGet()]
+        [HttpGet(), Authorize()]
         public async Task<IActionResult> GetAllUsers()
         {
             var response = await _authService.GetAllUsers();
@@ -28,21 +29,10 @@ namespace ProyectoDonacion.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}"), Authorize()]
         public async Task<IActionResult> GetUserById([FromRoute] string id)
         {
             var response = await _authService.GetUserById(id);
-
-            if (response.Type != ResponseType.Ok)
-                return BadRequest(response);
-
-            return Ok(response);
-        }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
-        {
-            var response = await _authService.Login(dto);
 
             if (response.Type != ResponseType.Ok)
                 return BadRequest(response);
@@ -61,15 +51,27 @@ namespace ProyectoDonacion.Controllers
             return Ok(response);
         }
 
-        [HttpPatch("{id}")]
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            var response = await _authService.Login(dto);
+
+            if (response.Type != ResponseType.Ok)
+                return BadRequest(response);
+
+            return Ok(response);
+        }
+
+
+        [HttpPatch("{id}"), Authorize()]
         public async Task<IActionResult> DesactivarUsuario([FromRoute] string id)
         {
             var response = await _authService.DesactivarUsuario(id);
+
             if (response.Type != ResponseType.Ok)
                 return BadRequest(response);
+
             return Ok(response);
-
-
         }
     }
 }
