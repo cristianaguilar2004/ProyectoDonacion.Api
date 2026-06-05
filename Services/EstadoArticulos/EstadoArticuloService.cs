@@ -1,6 +1,8 @@
 using AutoMapper;
+using Google.Cloud.Firestore;
 using ProyectoDonacion.Common;
 using ProyectoDonacion.DTOs.EstadoArticulos;
+using ProyectoDonacion.Models.Auth;
 using ProyectoDonacion.Models.EstadoArticulos;
 using ProyectoDonacion.Services.Auth;
 using ProyectoDonacion.Services.FireBase;
@@ -24,20 +26,20 @@ public class EstadoArticuloService
     {
         try
         {
-            var collection = _firebaseService.GetCollection("estados_articulo");
-            var snapshot = await collection.GetSnapshotAsync();
+            CollectionReference collection = _firebaseService.GetCollection("estados_articulo");
+            QuerySnapshot snapshot = await collection.GetSnapshotAsync();
 
-            var estados = new List<EstadoArticulo>();
-            foreach (var document in snapshot.Documents)
+            List<EstadoArticulo> estados = new List<EstadoArticulo>();
+            foreach (DocumentSnapshot document in snapshot.Documents)
             {
-                var estado = document.ConvertTo<EstadoArticulo>();
+                EstadoArticulo estado = document.ConvertTo<EstadoArticulo>();
                 estados.Add(estado);
             }
 
             if (soloActivos)
                 estados = estados.Where(e => e.Activo).ToList();
 
-            var estadosDto = _mapper.Map<List<EstadoArticuloDto>>(estados);
+            List<EstadoArticuloDto> estadosDto = _mapper.Map<List<EstadoArticuloDto>>(estados);
             return ApiResponse<List<EstadoArticuloDto>>.Success(estadosDto, $"Se encontraron {estadosDto.Count} estado(s) de artículo");
         }
         catch (Exception ex)
@@ -50,14 +52,14 @@ public class EstadoArticuloService
     {
         try
         {
-            var collection = _firebaseService.GetCollection("estados_articulo");
-            var docSnapshot = await collection.Document(id).GetSnapshotAsync();
+            CollectionReference collection = _firebaseService.GetCollection("estados_articulo");
+            DocumentSnapshot docSnapshot = await collection.Document(id).GetSnapshotAsync();
 
             if (!docSnapshot.Exists)
                 return ApiResponse<EstadoArticuloDto>.Failure("No se encontró el estado de artículo");
 
-            var estado = docSnapshot.ConvertTo<EstadoArticulo>();
-            var estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
+            EstadoArticulo estado = docSnapshot.ConvertTo<EstadoArticulo>();
+            EstadoArticuloDto estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
 
             return ApiResponse<EstadoArticuloDto>.Success(estadoDto, "Estado de artículo encontrado");
         }
@@ -71,18 +73,18 @@ public class EstadoArticuloService
     {
         try
         {
-            var usuarioActual = _usuarioAutenticadoService.ObtenerUsuarioActual();
+            UsuarioAutenticado usuarioActual = _usuarioAutenticadoService.ObtenerUsuarioActual();
 
-            var collection = _firebaseService.GetCollection("estados_articulo");
+            CollectionReference collection = _firebaseService.GetCollection("estados_articulo");
 
-            var existing = await collection
+            QuerySnapshot existing = await collection
                 .WhereEqualTo("Descripcion", dto.Descripcion)
                 .GetSnapshotAsync();
 
             if (existing.Count > 0)
                 return ApiResponse<EstadoArticuloDto>.Failure($"Ya existe un estado de artículo con la descripción '{dto.Descripcion}'");
 
-            var estado = new EstadoArticulo
+            EstadoArticulo estado = new EstadoArticulo
             {
                 Id = Guid.NewGuid().ToString(),
                 Descripcion = dto.Descripcion,
@@ -96,7 +98,7 @@ public class EstadoArticuloService
 
             await collection.Document(estado.Id).SetAsync(estado);
 
-            var estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
+            EstadoArticuloDto estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
             return ApiResponse<EstadoArticuloDto>.Success(estadoDto, "Estado de artículo creado exitosamente");
         }
         catch (Exception ex)
@@ -109,15 +111,15 @@ public class EstadoArticuloService
     {
         try
         {
-            var usuarioActual = _usuarioAutenticadoService.ObtenerUsuarioActual();
+            UsuarioAutenticado usuarioActual = _usuarioAutenticadoService.ObtenerUsuarioActual();
 
-            var collection = _firebaseService.GetCollection("estados_articulo");
-            var docSnapshot = await collection.Document(dto.Id).GetSnapshotAsync();
+            CollectionReference collection = _firebaseService.GetCollection("estados_articulo");
+            DocumentSnapshot docSnapshot = await collection.Document(dto.Id).GetSnapshotAsync();
 
             if (!docSnapshot.Exists)
                 return ApiResponse<EstadoArticuloDto>.Failure("No se encontró el estado de artículo");
 
-            var existing = await collection
+            QuerySnapshot existing = await collection
                 .WhereEqualTo("Descripcion", dto.Descripcion)
                 .GetSnapshotAsync();
 
@@ -147,10 +149,10 @@ public class EstadoArticuloService
     {
         try
         {
-            var usuarioActual = _usuarioAutenticadoService.ObtenerUsuarioActual();
+            UsuarioAutenticado usuarioActual = _usuarioAutenticadoService.ObtenerUsuarioActual();
 
-            var collection = _firebaseService.GetCollection("estados_articulo");
-            var docSnapshot = await collection.Document(id).GetSnapshotAsync();
+            CollectionReference collection = _firebaseService.GetCollection("estados_articulo");
+            DocumentSnapshot docSnapshot = await collection.Document(id).GetSnapshotAsync();
 
             if (!docSnapshot.Exists)
                 return ApiResponse<EstadoArticuloDto>.Failure("No se encontró el estado de artículo");
@@ -162,7 +164,7 @@ public class EstadoArticuloService
 
             await collection.Document(id).SetAsync(estado);
 
-            var estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
+            EstadoArticuloDto estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
             string mensaje = estado.Activo ? "Estado de artículo activado exitosamente" : "Estado de artículo desactivado exitosamente";
             return ApiResponse<EstadoArticuloDto>.Success(estadoDto, mensaje);
         }
