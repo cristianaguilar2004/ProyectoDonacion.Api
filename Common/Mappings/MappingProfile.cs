@@ -1,8 +1,10 @@
 using AutoMapper;
 using ProyectoDonacion.DTOs.Auth;
 using ProyectoDonacion.DTOs.Categorias;
+using ProyectoDonacion.DTOs.Donaciones;
 using ProyectoDonacion.Models.Auth;
 using ProyectoDonacion.Models.Categorias;
+using ProyectoDonacion.Models.Donaciones;
 
 namespace ProyectoDonacion.Common.Mappings;
 
@@ -17,6 +19,11 @@ public class MappingProfile : Profile
         CreateMap<Categoria, CategoriaDto>().ReverseMap();
         CreateMap<CreateCategoriaDto, Categoria>();
         CreateMap<UpdateCategoriaDto, Categoria>();
+
+        // Mapeo para Estados de Artículo
+        CreateMap<EstadoArticulo, EstadoArticuloDto>().ReverseMap();
+        CreateMap<CreateEstadoArticuloDto, EstadoArticulo>();
+        CreateMap<UpdateEstadoArticuloDto, EstadoArticulo>();
     }
 
 
