@@ -1,10 +1,10 @@
 using AutoMapper;
 using ProyectoDonacion.DTOs.Auth;
 using ProyectoDonacion.DTOs.Categorias;
-using ProyectoDonacion.DTOs.Donaciones;
+using ProyectoDonacion.DTOs.EstadoArticulos;
 using ProyectoDonacion.Models.Auth;
 using ProyectoDonacion.Models.Categorias;
-using ProyectoDonacion.Models.Donaciones;
+using ProyectoDonacion.Models.EstadoArticulos;
 
 namespace ProyectoDonacion.Common.Mappings;
 

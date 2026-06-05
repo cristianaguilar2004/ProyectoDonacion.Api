@@ -1,11 +1,11 @@
 using AutoMapper;
 using ProyectoDonacion.Common;
-using ProyectoDonacion.DTOs.Donaciones;
-using ProyectoDonacion.Models.Donaciones;
+using ProyectoDonacion.DTOs.EstadoArticulos;
+using ProyectoDonacion.Models.EstadoArticulos;
 using ProyectoDonacion.Services.Auth;
 using ProyectoDonacion.Services.FireBase;
 
-namespace ProyectoDonacion.Services.Donaciones;
+namespace ProyectoDonacion.Services.EstadoArticulos;
 
 public class EstadoArticuloService
 {
@@ -27,17 +27,17 @@ public class EstadoArticuloService
             var collection = _firebaseService.GetCollection("estados_articulo");
             var snapshot = await collection.GetSnapshotAsync();
 
-            List<EstadoArticulo> estados = new List<EstadoArticulo>();
+            var estados = new List<EstadoArticulo>();
             foreach (var document in snapshot.Documents)
             {
-                EstadoArticulo estado = document.ConvertTo<EstadoArticulo>();
+                var estado = document.ConvertTo<EstadoArticulo>();
                 estados.Add(estado);
             }
 
             if (soloActivos)
                 estados = estados.Where(e => e.Activo).ToList();
 
-            List<EstadoArticuloDto> estadosDto = _mapper.Map<List<EstadoArticuloDto>>(estados);
+            var estadosDto = _mapper.Map<List<EstadoArticuloDto>>(estados);
             return ApiResponse<List<EstadoArticuloDto>>.Success(estadosDto, $"Se encontraron {estadosDto.Count} estado(s) de artículo");
         }
         catch (Exception ex)
@@ -56,8 +56,8 @@ public class EstadoArticuloService
             if (!docSnapshot.Exists)
                 return ApiResponse<EstadoArticuloDto>.Failure("No se encontró el estado de artículo");
 
-            EstadoArticulo estado = docSnapshot.ConvertTo<EstadoArticulo>();
-            EstadoArticuloDto estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
+            var estado = docSnapshot.ConvertTo<EstadoArticulo>();
+            var estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
 
             return ApiResponse<EstadoArticuloDto>.Success(estadoDto, "Estado de artículo encontrado");
         }
@@ -82,7 +82,7 @@ public class EstadoArticuloService
             if (existing.Count > 0)
                 return ApiResponse<EstadoArticuloDto>.Failure($"Ya existe un estado de artículo con la descripción '{dto.Descripcion}'");
 
-            EstadoArticulo estado = new EstadoArticulo
+            var estado = new EstadoArticulo
             {
                 Id = Guid.NewGuid().ToString(),
                 Descripcion = dto.Descripcion,
@@ -96,7 +96,7 @@ public class EstadoArticuloService
 
             await collection.Document(estado.Id).SetAsync(estado);
 
-            EstadoArticuloDto estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
+            var estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
             return ApiResponse<EstadoArticuloDto>.Success(estadoDto, "Estado de artículo creado exitosamente");
         }
         catch (Exception ex)
@@ -162,7 +162,7 @@ public class EstadoArticuloService
 
             await collection.Document(id).SetAsync(estado);
 
-            EstadoArticuloDto estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
+            var estadoDto = _mapper.Map<EstadoArticuloDto>(estado);
             string mensaje = estado.Activo ? "Estado de artículo activado exitosamente" : "Estado de artículo desactivado exitosamente";
             return ApiResponse<EstadoArticuloDto>.Success(estadoDto, mensaje);
         }

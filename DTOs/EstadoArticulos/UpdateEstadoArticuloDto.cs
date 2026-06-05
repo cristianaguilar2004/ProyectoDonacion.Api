@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ProyectoDonacion.DTOs.Donaciones;
+namespace ProyectoDonacion.DTOs.EstadoArticulos;
 
 public class UpdateEstadoArticuloDto
 {
