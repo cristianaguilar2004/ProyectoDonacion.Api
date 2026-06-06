@@ -2,6 +2,7 @@
 using ProyectoDonacion.DTOs.Categorias;
 using ProyectoDonacion.DTOs.EstadoArticulos;
 using ProyectoDonacion.DTOs.EstadoDonaciones;
+using ProyectoDonacion.DTOs.Sucursales;
 
 namespace ProyectoDonacion.DTOs.Donaciones
 {
@@ -12,11 +13,12 @@ namespace ProyectoDonacion.DTOs.Donaciones
         public string CategoriaId { get; set; }
         public string EstadoArticuloId { get; set; }
         public string EstadoDonacionId { get; set; }
-        public string ZonEntrega { get; set; }
+        public string SucursalId { get; set; }
         public string UrlImagen { get; set; }
 
         public CategoriaDto Categoria { get; set; }
         public EstadoArticuloDto EstadoArticulo { get; set; }
         public EstadoDonacionDto EstadoDonacion { get; set; }
+        public SucursalDto Sucursal { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using ProyectoDonacion.Common.Models;
 using ProyectoDonacion.Models.Categorias;
 using ProyectoDonacion.Models.EstadoArticulos;
 using ProyectoDonacion.Models.EstadoDonaciones;
+using ProyectoDonacion.Models.Sucursales;
 
 namespace ProyectoDonacion.Models.Donaciones
 {
@@ -24,8 +25,8 @@ namespace ProyectoDonacion.Models.Donaciones
         [FirestoreProperty("EstadoDonacionId")]
         public string EstadoDonacionId { get; set; }
 
-        [FirestoreProperty("ZonaEntrega")]
-        public string ZonaEntrega { get; set; }
+        [FirestoreProperty("SucursalId")]
+        public string SucursalId { get; set; }
 
         [FirestoreProperty("UrlImagen")]
         public string UrlImagen { get; set; }
@@ -34,6 +35,7 @@ namespace ProyectoDonacion.Models.Donaciones
         public Categoria Categoria { get; set; }
         public EstadoArticulo EstadoArticulo { get; set; }
         public EstadoDonacion EstadoDonacion { get; set; }
+        public Sucursal Sucursal { get; set; }
 
 
         public bool IsValid(out string validationMessage)
@@ -68,9 +70,9 @@ namespace ProyectoDonacion.Models.Donaciones
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(ZonaEntrega))
+            if (string.IsNullOrWhiteSpace(SucursalId))
             {
-                validationMessage = "La zona de entrega es requerida";
+                validationMessage = "La sucursal es requerida";
                 return false;
             }
 

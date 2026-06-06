@@ -3,9 +3,11 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using ProyectoDonacion.Services.Auth;
 using ProyectoDonacion.Services.Categorias;
+using ProyectoDonacion.Services.Donaciones;
 using ProyectoDonacion.Services.EstadoArticulos;
 using ProyectoDonacion.Services.EstadoDonaciones;
 using ProyectoDonacion.Services.FireBase;
+using ProyectoDonacion.Services.Sucursales;
 using Scalar.AspNetCore;
 using System.Text;
 
@@ -65,7 +67,9 @@ builder.Services.AddTransient<AuthService>()
     .AddScoped<UsuarioAutenticadoService>()
     .AddTransient<CategoriaService>()
     .AddTransient<EstadoArticuloService>()
-    .AddTransient<EstadoDonacionService>();
+    .AddTransient<EstadoDonacionService>()
+    .AddTransient<SucursalService>()
+    .AddTransient<DonacionService>();
 
 var app = builder.Build();
 
