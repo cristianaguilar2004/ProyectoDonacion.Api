@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Google.Api;
 using Google.Cloud.Firestore;
+using Newtonsoft.Json;
 using ProyectoDonacion.Common;
 using ProyectoDonacion.DTOs.Categorias;
 using ProyectoDonacion.DTOs.Donaciones;
@@ -92,6 +94,22 @@ namespace ProyectoDonacion.Services.Donaciones
             catch (Exception ex)
             {
                 return ApiResponse<List<DonacionDto>>.Failure($"Error al obtener las donaciones: {ex.Message}");
+            }
+        }
+
+
+        public async Task<ApiResponse<DonacionDto>> CreateDonacion(IFormCollection form)
+        {
+            try
+            {
+                DonacionDto donacionDto = JsonConvert.DeserializeObject<DonacionDto>(form["datos"]);
+
+
+                return ApiResponse<DonacionDto>.Success(new DonacionDto(), "Donacion creada exitosamente");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<DonacionDto>.Failure($"Error al crear la donacion: {ex.Message}");
             }
         }
 

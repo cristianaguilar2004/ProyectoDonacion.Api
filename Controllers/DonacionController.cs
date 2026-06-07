@@ -25,5 +25,15 @@ namespace ProyectoDonacion.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> PostDonacion([FromForm] IFormCollection form)
+        {
+            var response = await _donacionService.CreateDonacion(form);
+            if (response.Type != ResponseType.Ok)
+                return BadRequest(response);
+
+            return Ok(response);
+        }
     }
 }
