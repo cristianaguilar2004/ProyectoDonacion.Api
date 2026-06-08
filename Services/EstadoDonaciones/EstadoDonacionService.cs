@@ -88,7 +88,7 @@ public class EstadoDonacionService
             {
                 Id = Guid.NewGuid().ToString(),
                 Descripcion = dto.Descripcion,
-                UsuarioAgrega = usuarioActual.EmailAddress,
+                UsuarioAgrega = usuarioActual.NameIdentifier,
                 FechaCreacion = DateTime.UtcNow,
                 Activo = true
             };
@@ -128,7 +128,7 @@ public class EstadoDonacionService
 
             EstadoDonacion estado = docSnapshot.ConvertTo<EstadoDonacion>();
             estado.Descripcion = dto.Descripcion;
-            estado.UsuarioModifica = usuarioActual.EmailAddress;
+            estado.UsuarioModifica = usuarioActual.NameIdentifier;
             estado.FechaModifica = DateTime.UtcNow;
 
             if (!estado.IsValid(out string validationMessage))
@@ -159,7 +159,7 @@ public class EstadoDonacionService
 
             EstadoDonacion estado = docSnapshot.ConvertTo<EstadoDonacion>();
             estado.Activo = !estado.Activo;
-            estado.UsuarioModifica = usuarioActual.EmailAddress;
+            estado.UsuarioModifica = usuarioActual.NameIdentifier;
             estado.FechaModifica = DateTime.UtcNow;
 
             await collection.Document(id).SetAsync(estado);

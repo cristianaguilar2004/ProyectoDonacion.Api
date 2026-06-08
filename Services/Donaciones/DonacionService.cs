@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Google.Api;
 using Google.Cloud.Firestore;
 using Newtonsoft.Json;
 using ProyectoDonacion.Common;
@@ -8,6 +7,7 @@ using ProyectoDonacion.DTOs.Donaciones;
 using ProyectoDonacion.DTOs.EstadoArticulos;
 using ProyectoDonacion.DTOs.EstadoDonaciones;
 using ProyectoDonacion.DTOs.Sucursales;
+using ProyectoDonacion.Models.Donaciones;
 using ProyectoDonacion.Services.Auth;
 using ProyectoDonacion.Services.Categorias;
 using ProyectoDonacion.Services.EstadoArticulos;
@@ -26,6 +26,7 @@ namespace ProyectoDonacion.Services.Donaciones
         private readonly EstadoDonacionService _estadoDonacionService;
         private readonly CategoriaService _categoriaService;
         private readonly SucursalService _sucursalService;
+        private readonly FileService _fileService;
 
         public DonacionService(FirebaseService firebaseService, 
                                IMapper mapper, 
@@ -33,7 +34,8 @@ namespace ProyectoDonacion.Services.Donaciones
                                EstadoArticuloService estadoArticuloService,
                                EstadoDonacionService estadoDonacionService,
                                CategoriaService categoriaService,
-                               SucursalService sucursalService)
+                               SucursalService sucursalService,
+                               FileService fileService)
         {
             _firebaseService = firebaseService;
             _mapper = mapper;
@@ -42,6 +44,7 @@ namespace ProyectoDonacion.Services.Donaciones
             _estadoDonacionService = estadoDonacionService;
             _categoriaService = categoriaService;
             _sucursalService = sucursalService;
+            _fileService = fileService;
         }
 
         public async Task<ApiResponse<List<DonacionDto>>> GetDonaciones(bool soloActivos = true)
@@ -51,10 +54,10 @@ namespace ProyectoDonacion.Services.Donaciones
                 CollectionReference collection = _firebaseService.GetCollection("donaciones");
                 QuerySnapshot snapshot = await collection.GetSnapshotAsync();
 
-                List<DonacionDto> donaciones = new List<DonacionDto>();
+                List<Donacion> donaciones = new List<Donacion>();
                 foreach (DocumentSnapshot document in snapshot.Documents)
                 {
-                    DonacionDto donacion = document.ConvertTo<DonacionDto>();
+                    Donacion donacion = document.ConvertTo<Donacion>();
                     donaciones.Add(donacion);
                 }
 
@@ -102,10 +105,35 @@ namespace ProyectoDonacion.Services.Donaciones
         {
             try
             {
-                DonacionDto donacionDto = JsonConvert.DeserializeObject<DonacionDto>(form["datos"]);
+                var collection = _firebaseService.GetCollection("donaciones");
 
+                CreateDonacionDto donacionDto = JsonConvert.DeserializeObject<CreateDonacionDto>(form["datos"]);
+                ApiResponse<string> fileResponse = await _fileService.SubirAdjuntos(form.Files);
 
-                return ApiResponse<DonacionDto>.Success(new DonacionDto(), "Donacion creada exitosamente");
+                if (fileResponse.Type != ResponseType.Ok)
+                    return ApiResponse<DonacionDto>.Warning(fileResponse.Message);
+
+                Donacion donacion = new Donacion()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    NombreArticulo = donacionDto.NombreArticulo,
+                    DescripcionArticulo = donacionDto.DescripcionArticulo,
+                    CategoriaId = donacionDto.CategoriaId,
+                    EstadoArticuloId = donacionDto.EstadoArticuloId,
+                    EstadoDonacionId = "040fc728-5a86-4977-972e-193430550894",
+                    SucursalId = donacionDto.SucursalId,
+                    UrlImagen = fileResponse.Data,
+                    Activo = true,
+                    UsuarioAgrega = _usuarioAutenticadoService.ObtenerUsuarioActual().NameIdentifier,
+                    FechaCreacion = DateTime.UtcNow
+                };
+
+                if (!donacion.IsValid(out string messsage))
+                    return ApiResponse<DonacionDto>.Warning(messsage);
+
+                await collection.Document(donacion.Id).SetAsync(donacion);
+
+                return ApiResponse<DonacionDto>.Success(_mapper.Map<DonacionDto>(donacion), "Donacion creada exitosamente");
             }
             catch (Exception ex)
             {

@@ -1,3 +1,5 @@
+using CloudinaryDotNet;
+using dotenv.net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -54,6 +56,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     };
 });
 
+//configurar Cloudinary
+var cloudinaryUrl = builder.Configuration["CLOUDINARY_URL"];
+Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
+cloudinary.Api.Secure = true;
+builder.Services.AddSingleton(cloudinary);
+
 // AddAuthorization, habilitar el uso del [Authorize] en los controllers
 builder.Services.AddAuthorization();
 
@@ -69,7 +77,8 @@ builder.Services.AddTransient<AuthService>()
     .AddTransient<EstadoArticuloService>()
     .AddTransient<EstadoDonacionService>()
     .AddTransient<SucursalService>()
-    .AddTransient<DonacionService>();
+    .AddTransient<DonacionService>()
+    .AddTransient<FileService>();
 
 var app = builder.Build();
 

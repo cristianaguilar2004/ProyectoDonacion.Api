@@ -1,11 +1,13 @@
 using AutoMapper;
 using ProyectoDonacion.DTOs.Auth;
 using ProyectoDonacion.DTOs.Categorias;
+using ProyectoDonacion.DTOs.Donaciones;
 using ProyectoDonacion.DTOs.EstadoArticulos;
 using ProyectoDonacion.DTOs.EstadoDonaciones;
 using ProyectoDonacion.DTOs.Sucursales;
 using ProyectoDonacion.Models.Auth;
 using ProyectoDonacion.Models.Categorias;
+using ProyectoDonacion.Models.Donaciones;
 using ProyectoDonacion.Models.EstadoArticulos;
 using ProyectoDonacion.Models.EstadoDonaciones;
 using ProyectoDonacion.Models.Sucursales;
@@ -36,6 +38,9 @@ public class MappingProfile : Profile
 
         //Mapeo para Sucursales
         CreateMap<Sucursal, SucursalDto>().ReverseMap();
+
+        //Mapeo de donaciones
+        CreateMap<Donacion, DonacionDto>().ReverseMap();
     }
 
 
