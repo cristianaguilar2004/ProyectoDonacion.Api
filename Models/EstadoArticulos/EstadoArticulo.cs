@@ -1,7 +1,7 @@
-﻿using Google.Cloud.Firestore;
+using Google.Cloud.Firestore;
 using ProyectoDonacion.Common.Models;
 
-namespace ProyectoDonacion.Models.Donaciones;
+namespace ProyectoDonacion.Models.EstadoArticulos;
 
 [FirestoreData]
 public class EstadoArticulo : EntidadBase

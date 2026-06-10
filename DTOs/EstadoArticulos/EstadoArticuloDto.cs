@@ -1,6 +1,6 @@
 using ProyectoDonacion.Common.DTOs;
 
-namespace ProyectoDonacion.DTOs.Donaciones;
+namespace ProyectoDonacion.DTOs.EstadoArticulos;
 
 public class EstadoArticuloDto : EntidadBaseDto
 {

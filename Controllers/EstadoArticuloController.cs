@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoDonacion.Common;
-using ProyectoDonacion.DTOs.Donaciones;
-using ProyectoDonacion.Services.Donaciones;
+using ProyectoDonacion.DTOs.EstadoArticulos;
+using ProyectoDonacion.Services.EstadoArticulos;
 
 namespace ProyectoDonacion.Controllers;
 
